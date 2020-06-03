@@ -8,6 +8,8 @@ class BalancePage extends StatefulWidget {
 
 class _BalancePage extends State<BalancePage> {
 
+  static const routeName = "/detailScreen";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +18,19 @@ class _BalancePage extends State<BalancePage> {
   }
 }
 
+class ScreenArguments {
+
+  String title;
+  String msg;
+
+  ScreenArguments(this.title, this.msg);
+
+}
+
 class MainScreen extends StatelessWidget {
+
+  static const routeName = "/mainScreen";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,9 +41,10 @@ class MainScreen extends StatelessWidget {
       ),
       body: GestureDetector(
         onTap: () {
-          Navigator.push(
+          Navigator.pushNamed(
               context,
-              MaterialPageRoute(builder: (context) => DetailScreen()),
+              DetailScreen.routeName,
+              arguments: ScreenArguments("Greetings", "I'am from Main Screen"),
           );
         },
 
@@ -37,7 +52,8 @@ class MainScreen extends StatelessWidget {
             tag: "imageHero",
             child: Icon(
               Icons.ac_unit,
-              size: 150,
+              size: 50,
+              color: Colors.blue,
             ),
         ),
       ),
@@ -46,40 +62,55 @@ class MainScreen extends StatelessWidget {
 }
 
 class DetailScreen extends StatelessWidget {
+
+  static const routeName = "/detailScreen";
+
+  String msg;
+
   @override
   Widget build(BuildContext context) {
+
+    ScreenArguments screenArguments = ModalRoute.of(context).settings.arguments;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Detail Screen"
+            screenArguments.title
         ),
       ),
       body: GestureDetector(
         onTap: () {
-          Navigator.pop(context);
+          Navigator.pop(
+              context,
+              "I'am from Detail Screen"
+          );
         },
         child: Hero(
-            /*placeholderBuilder: (context, size, widget) {
-              return Container(
-                width: 150,
-                height: 150,
-                child: CircularProgressIndicator(),
-              );
-            },*/
-            flightShuttleBuilder: (context, animation, direction, fromContext, toContext) {
-              return Icon(Icons.audiotrack);
-            },
-            transitionOnUserGestures: true,
-            tag: "imageHero",
-            child: Center(
-              child:
+          flightShuttleBuilder: (context, animation, direction, fromContext,
+              toContext) {
+            return Icon(Icons.audiotrack);
+          },
+          transitionOnUserGestures: true,
+          tag: "imageHero",
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
                 Icon(
                   Icons.ac_unit,
-                  size: 150,
-              ),
+                  size: 50,
+                  color: Colors.blueAccent,
+                ),
+                Text(
+                    screenArguments.msg,
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+              ],
             ),
+          ),
         ),
-
       ),
     );
   }
