@@ -41,23 +41,49 @@ class MainScreen extends StatelessWidget {
       ),
       body: GestureDetector(
         onTap: () {
-          Navigator.pushNamed(
-              context,
-              DetailScreen.routeName,
-              arguments: ScreenArguments("Greetings", "I'am from Main Screen"),
-          );
+          _navigateAndDisplaySelection(context);
         },
 
-        child: Hero(
-            tag: "imageHero",
-            child: Icon(
-              Icons.ac_unit,
-              size: 50,
-              color: Colors.blue,
+        child: Column(
+          children: <Widget>[
+            Hero(
+              tag: "imageHero",
+              child: Icon(
+                Icons.ac_unit,
+                size: 50,
+                color: Colors.blue,
+              ),
             ),
+            Container(
+              child: Text(
+                "",
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  _navigateAndDisplaySelection(BuildContext context) async {
+
+    final result = await Navigator.pushNamed(context, DetailScreen.routeName,
+            arguments: ScreenArguments("Greetings", "I'am from Main Screen"),
+    );
+
+    Scaffold.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+          content:Text(
+            "$result",
+            style: TextStyle(color:Colors.yellowAccent),
+          ),
+          //backgroundColor: Colors.blueGrey,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+          action: SnackBarAction(label: "Got it!", onPressed: () {}),
+      ));
   }
 }
 
@@ -101,12 +127,15 @@ class DetailScreen extends StatelessWidget {
                   size: 50,
                   color: Colors.blueAccent,
                 ),
-                Text(
+                Container(
+                  padding: EdgeInsets.only(top: 15),
+                  child: Text(
                     screenArguments.msg,
                     style: TextStyle(
                       color: Colors.blueAccent,
                     ),
                   ),
+                ),
               ],
             ),
           ),
