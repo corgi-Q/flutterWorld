@@ -12,7 +12,13 @@ class _RateState extends State<RatePage> {
 
   Future<Album> futureAlbum;
 
+  Future<Album> futureCreateAlbum;
+
+  /// page no
   int _pageNo = 1;
+
+  /// album title input controller
+  final TextEditingController _albumTitleController = TextEditingController();
 
   /// http request handled in initState
   @override
@@ -27,26 +33,65 @@ class _RateState extends State<RatePage> {
       appBar: AppBar(
         title: Text("My Album"),
       ),
-      body: FutureBuilder<Album>(
-        future: fetchAlbum(_pageNo),
-        builder: (context, snapShot) {
-          if (snapShot.hasData) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Page No $_pageNo"),
-                  Text(snapShot.data.title),
-                ],
-              ),
-            );
-          } else if (snapShot.hasError) {
-            return Text("${snapShot.error}");
-          }
+      body: Column(
+        children: <Widget>[
+          FutureBuilder<Album>(
+            future: fetchAlbum(_pageNo),
+            builder: (context, snapShot) {
+              if (snapShot.hasData) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text("Page No $_pageNo"),
+                      Text(snapShot.data.title),
+                    ],
+                  ),
+                );
+              } else if (snapShot.hasError) {
+                return Text("${snapShot.error}");
+              }
 
-          // By default, show a loading spinner.
-          return Center(child: CircularProgressIndicator(),);
-        },
+              // By default, show a loading spinner.
+              return Center(child: CircularProgressIndicator(),);
+            },
+          ),
+          Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(8.0),
+            child: (futureCreateAlbum == null)
+              ? Column(
+                 mainAxisAlignment: MainAxisAlignment.center,
+                 children: <Widget>[
+                   TextField(
+                     controller: _albumTitleController,
+                     decoration: InputDecoration(hintText: "input album title"),
+                   ),
+                   RaisedButton(
+                       child: Text("create data"),
+                       onPressed: () {
+                         setState(() {
+                           futureCreateAlbum = createAlbum(_albumTitleController.text);
+                         });
+                       }
+                   ),
+                 ],
+              )
+              : FutureBuilder<Album>(
+                 future: futureCreateAlbum,
+                 builder: (context, snapshot) {
+                   if(snapshot.hasData) {
+                     return Text(snapshot.data.title);
+                   } else if(snapshot.hasError) {
+                     return Text("${snapshot.hasError}");
+                   }
+
+                   return CircularProgressIndicator();
+                 },
+            ),
+          ),
+
+        ],
       ),
       floatingActionButton: FloatingActionButton(
           child: Text("Next"),
@@ -68,6 +113,26 @@ class _RateState extends State<RatePage> {
       return Album.fromJson(json.decode(response.body));
     } else {
       throw Exception("Fail to load album");
+    }
+  }
+
+  Future<Album> createAlbum(String title) async {
+    final http.Response response = await http.post(
+      'https://jsonplaceholder.typicode.com/albums',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'title': title,
+      }),
+    );
+
+    if(response.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      return Album.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception("Failed to load album");
     }
   }
 }
